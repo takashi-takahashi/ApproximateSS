@@ -1,5 +1,5 @@
-include("ApproximateSS.jl")
-include("MyMeasurements.jl")
+include("./src/ApproximateSS.jl")
+include("./src/MyMeasurements.jl")
 using .ApproximateSS
 using .MyMeasurements
 using Distributions, LinearAlgebra
@@ -7,7 +7,7 @@ using GLMNet
 
 m, n = 250, 2000;
 ρ = 0.01;
-intercept = true;
+intercept = false;
 if intercept 
     println("intercept estimation is not implemented for diagonal restricted covariance (self-averaging case)")
     println("(intercept argument will be ignored)")

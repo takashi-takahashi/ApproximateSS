@@ -1,5 +1,5 @@
-include("ApproximateSS.jl")
-include("MyMeasurements.jl")
+include("./src/ApproximateSS.jl")
+include("./src/MyMeasurements.jl")
 using .MyMeasurements
 using .ApproximateSS
 using Distributions, LinearAlgebra
@@ -9,7 +9,7 @@ using GLMNet
 m, n = 250, 2000;
 ρ = 0.1;
 σ = 0.2;
-intercept = true
+intercept = false;
 if intercept 
     println("intercept estimation is not implemented for diagonal restricted covariance (self-averaging case)")
     println("(intercept argument will be ignored)")
@@ -66,7 +66,7 @@ function do_SS(A, y, n_B, μ_B, λ; tol=1.0e-10, randomize=false, intercept=fals
     end
     return active_array, first_moment_array, intercept_first_moment_array
 end
-n_B = 100
+n_B = 10000
 μ_B = 1.0
 
 @time active_array, first_moment_array, intercept_first_moment_array = do_SS(
