@@ -90,7 +90,7 @@ function rvamp(
     # preparation
     μ = bootstrap_ratio
     m, n = size(A);  # system size
-    c_max = Int(round(μ * 100))
+    c_max = Int(round(μ * 30))
     # c_array = convert(Array{Float64}, 0:c_max);
     # poisson_weight = [pdf(Poisson(μ), c) for c in 0:c_max];
     
@@ -414,7 +414,7 @@ function rvamp(
     # preparation
     μ = bootstrap_ratio
     m, n = size(A);  # system size
-    c_max = Int(round(μ * 100))
+    c_max = Int(round(μ * 30))
     # c_array = convert(Array{Float64}, 0:c_max);
     # poisson_weight = [pdf(Poisson(μ), c) for c in 0:c_max];
     
