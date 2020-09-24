@@ -31,10 +31,15 @@ rvamp result (diagonal)
 複数の正則化パラメータに対して結果を保持することを想定している。
 """
 struct RVAMPDiagonal
+    "Onsager coefficient"
     q1x_hat::Array{Float64, 2}  # Onsager coefficient
+    "conjugate variable for variance"
     v1x_hat::Array{Float64, 2}  # variance conjugate 
+    "local field"
     h1x::Array{Float64, 2}  # local field 
+    "stability"
     Π::Array{Float64, 2}  # stability
+    "first moment"
     x1_hat::Array{Float64, 2}  # first moment
 end
 
@@ -44,20 +49,45 @@ rvamp result (diagonal restricted)
 複数の正則化パラメータに対して結果を保持することを想定している。
 """
 struct RVAMPDiagonalRestricted
-    q1x_hat::Array{Float64,1}  # Onsager coefficient
-    v1x_hat::Array{Float64,1}  # variance conjugate
+    "Onsager coefficient"
+    q1x_hat::Array{Float64,1}
+    "conjugate variable for variance"
+    v1x_hat::Array{Float64,1}
+    "local field"
     h1x::Array{Float64, 2}  # local field 
+    "stability"
     Π::Array{Float64, 2}  # stability　
+    "first moment"
     x1_hat::Array{Float64, 2}  # first moment
 end
 
 """
-replicated vector AMP (diagonal covariance)
-linear regression
+
+    rvamp(A, y, λ, Normal(), Diagonal()[, intercept, ...])
+
+replicated vector AMP for linear regression (diagonal covariance)
+
+# Arguments
+- `A::Array{Float64, 2}`: design matrix (m x n)
+- `y::Array{Float64, 1}`: response (m)
+- `λ::Array{Float64, 1}`: regularization parameter
+- `family::Normal{Float64}`: link
+- `cov::Diagonal`: covariance type
+- `intercept=false`: whether to fit an (unpenalized) model intercept 
+- `dumping=0.85`: dumping parameter in [0,1]
+- `t_max=30`: maximum number of iterations
+- `tol=1e-8`: tolerance for rvamp iterations
+- `bootstrap_ratio=1.0`: bootstrap sample size ratio
+- `pw=1.0`: the probability used in randomized lasso (pw=1.0 corresponds to bolasso)
+- `w=2.0`: strengthen parameter. with prob. pw, the regularization parameter is multiplied by w (λ_i -> w * λ_i)
+- `clamp_min=1.0e-9`: 
+- `clamp_max=1.0e9`: 
+- `debug=false`: flag for debug mode
+- `info=false`: whether to show iteration process
 """
 function rvamp(
         A::Array{Float64, 2}, y::Array{Float64,1}, λ::Array{Float64, 1}, family::Normal{Float64}, cov::Diagonal;
-        intercept=false, dumping=0.85, t_max = 30, n_points=15, tol=1e-8, 
+        intercept=false, dumping=0.85, t_max = 30, tol=1e-8, 
         bootstrap_ratio=1.0, pw=0.0, w=2.0,
         clamp_min=1.0e-9, clamp_max=1.0e9, info=true, debug=false
     )::RVAMPDiagonal
@@ -378,12 +408,32 @@ function rvamp(
 end
 
 """
-replicated vector AMP (diagonal restricted covariance)
-linear regression
+
+rvamp(A, y, λ, Normal(), DiagonalRestricted()[, intercept, ...])
+
+replicated vector AMP for linear regression (diagonal restricted covariance)
+
+# Arguments
+- `A::Array{Float64, 2}`: design matrix (m x n)
+- `y::Array{Float64, 1}`: response (m)
+- `λ::Array{Float64, 1}`: regularization parameter
+- `family::Normal{Float64}`: link
+- `cov::Diagonal`: covariance type
+- `intercept=false`: whether to fit an (unpenalized) model intercept 
+- `dumping=0.85`: dumping parameter in [0,1]
+- `t_max=30`: maximum number of iterations
+- `tol=1e-8`: tolerance for rvamp iterations
+- `bootstrap_ratio=1.0`: bootstrap sample size ratio
+- `pw=1.0`: the probability used in randomized lasso (pw=1.0 corresponds to bolasso)
+- `w=2.0`: strengthen parameter. with prob. pw, the regularization parameter is multiplied by w (λ_i -> w * λ_i)
+- `clamp_min=1.0e-9`: 
+- `clamp_max=1.0e9`: 
+- `debug=false`: flag for debug mode
+- `info=false`: whether to show iteration process
 """
 function rvamp(
         A::Array{Float64, 2}, y::Array{Float64,1}, λ::Array{Float64, 1}, family::Normal{Float64}, cov::DiagonalRestricted;
-        intercept=false, dumping=0.85, t_max=30, n_points=15, tol=1e-8, 
+        intercept=false, dumping=0.85, t_max=30, tol=1e-8, 
         bootstrap_ratio=1.0, pw=0.0, w=2.0,
         clamp_min=1.0e-9, clamp_max=1.0e9, info=true, debug=false
     )::RVAMPDiagonalRestricted
@@ -671,8 +721,29 @@ end
 
 
 """
-replicated vector AMP (diagonal covariance)
-logistic regression
+
+rvamp(A, y, λ, Binomial(), Diagonal()[, intercept, ...])
+
+replicated vector AMP for logistic regression (diagonal covariance)
+
+# Arguments
+- `A::Array{Float64, 2}`: design matrix (m x n)
+- `y::Array{Float64, 1}`: response (m). y_j takes a value in {-1, 1}
+- `λ::Array{Float64, 1}`: regularization parameter
+- `family::Normal{Float64}`: link
+- `cov::Diagonal`: covariance type
+- `intercept=false`: whether to fit an (unpenalized) model intercept 
+- `dumping=0.85`: dumping parameter in [0,1]
+- `t_max=30`: maximum number of iterations
+- `n_points=15`: the number of points used in Gauss-Hermite integral
+- `tol=1e-8`: tolerance for rvamp iterations
+- `bootstrap_ratio=1.0`: bootstrap sample size ratio
+- `pw=1.0`: the probability used in randomized lasso (pw=1.0 corresponds to bolasso)
+- `w=2.0`: strengthen parameter. with prob. pw, the regularization parameter is multiplied by w (λ_i -> w * λ_i)
+- `clamp_min=1.0e-9`: 
+- `clamp_max=1.0e9`: 
+- `debug=false`: flag for debug mode
+- `info=false`: whether to show iteration process
 """
 function rvamp(
     A::Array{Float64, 2}, y::Array{Float64,1}, λ::Array{Float64, 1}, family::Binomial{Float64}, cov::Diagonal;
@@ -1013,8 +1084,29 @@ function rvamp(
 end
 
 """
-replicated vector AMP (diagonal restricted covariance)
-logistic regression
+
+rvamp(A, y, λ, Binomial(), Diagonal()[, intercept, ...])
+
+replicated vector AMP for logistic regression (diagonal restricted covariance)
+
+# Arguments
+- `A::Array{Float64, 2}`: design matrix (m x n)
+- `y::Array{Float64, 1}`: response (m). y_j takes a value in {-1, 1}
+- `λ::Array{Float64, 1}`: regularization parameter
+- `family::Normal{Float64}`: link
+- `cov::Diagonal`: covariance type
+- `intercept=false`: whether to fit an (unpenalized) model intercept 
+- `dumping=0.85`: dumping parameter in [0,1]
+- `t_max=30`: maximum number of iterations
+- `n_points=15`: the number of points used in Gauss-Hermite integral
+- `tol=1e-8`: tolerance for rvamp iterations
+- `bootstrap_ratio=1.0`: bootstrap sample size ratio
+- `pw=1.0`: the probability used in randomized lasso (pw=1.0 corresponds to bolasso)
+- `w=2.0`: strengthen parameter. with prob. pw, the regularization parameter is multiplied by w (λ_i -> w * λ_i)
+- `clamp_min=1.0e-9`: 
+- `clamp_max=1.0e9`: 
+- `debug=false`: flag for debug mode
+- `info=false`: whether to show iteration process
 """
 function rvamp(
         A::Array{Float64, 2}, y::Array{Float64,1}, λ::Array{Float64, 1}, family::Binomial{Float64}, cov::DiagonalRestricted;
