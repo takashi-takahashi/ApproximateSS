@@ -66,6 +66,7 @@ end
     rvamp(A, y, λ, Normal(), Diagonal()[, intercept, ...])
 
 replicated vector AMP for linear regression (diagonal covariance)
+*currently, we assume that the number of measurements is smaller than the dimension of the parameter*
 
 # Arguments
 - `A::Array{Float64, 2}`: design matrix (m x n)
@@ -412,6 +413,7 @@ end
 rvamp(A, y, λ, Normal(), DiagonalRestricted()[, intercept, ...])
 
 replicated vector AMP for linear regression (diagonal restricted covariance)
+*currently, we assume that the number of measurements is smaller than the dimension of the parameter*
 
 # Arguments
 - `A::Array{Float64, 2}`: design matrix (m x n)
@@ -725,6 +727,7 @@ end
 rvamp(A, y, λ, Binomial(), Diagonal()[, intercept, ...])
 
 replicated vector AMP for logistic regression (diagonal covariance)
+*currently, we assume that the number of measurements is smaller than the dimension of the parameter*
 
 # Arguments
 - `A::Array{Float64, 2}`: design matrix (m x n)
@@ -1088,6 +1091,7 @@ end
 rvamp(A, y, λ, Binomial(), Diagonal()[, intercept, ...])
 
 replicated vector AMP for logistic regression (diagonal restricted covariance)
+*currently, we assume that the number of measurements is smaller than the dimension of the parameter*
 
 # Arguments
 - `A::Array{Float64, 2}`: design matrix (m x n)
