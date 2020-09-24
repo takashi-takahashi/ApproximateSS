@@ -4,6 +4,7 @@ using .MyMeasurements
 using .ApproximateSS
 using Distributions, LinearAlgebra
 using GLMNet
+# using ApproximateSS  # if you installed ApproximateSS...
 
 
 m, n = 250, 2000;
