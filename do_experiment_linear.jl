@@ -60,7 +60,6 @@ n_B = 1000
 first_moment_experiment = vec(mean(first_moment_array[:, :, cv_index], dims=1));
 
 ### approximate SS ###
-# rvamp 
 @time ss_result = rvamp(A, y, λ_cv, Normal(), ApproximateSS.Diagonal(), dumping=0.8, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6);
 @time ss_result_sa = rvamp(A, y, λ_cv, Normal(), ApproximateSS.DiagonalRestricted(), dumping=0.8, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6);
 
