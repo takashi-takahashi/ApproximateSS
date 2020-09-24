@@ -129,17 +129,19 @@ function rvamp(
     chi2z = zeros(m);
     v2z = zeros(m);
 
-    X = zeros((n, n));
-    Y = zeros((n, n));
-    B = zeros((n, n));
+    B = zeros((m, m));
     C = zeros((m, m));
-    temp = zeros((m, n));
-    temp_A = zeros((m, m));
+    d = zeros(n);
+    BC = zeros((m, m));
+    temp = zeros((m, m));
+    temp2 = zeros((m, m));
+    temp3 = zeros((m, m));
+    h_tilde = zeros(n);
+    D = zeros((m, m));
+    F = zeros((m, m));
     q2x_hat_inv = zeros(n);
     q2z_hat_inv = zeros(m);
-    AB = zeros((m ,n));
-    AB_square = zeros((m, n));
-    
+
     η_p = zeros(n);
     η_m = zeros(n);
     η_p2 = zeros(n);
@@ -272,6 +274,8 @@ function rvamp(
                 clamp_min, clamp_max
             )
             
+            
+
             # Gaussian part
             if debug
                 println("Gaussian part")
@@ -305,31 +309,49 @@ function rvamp(
             #     diag(A*X*Y*X*A'),
             #     clamp_min, clamp_max
             # )
-            # B, C = woodbury(A, q2x_hat, q2z_hat)  # here we assume (M < N). 
             q2x_hat_inv .= 1.0 ./ q2x_hat
-            q2z_hat_inv .= 1.0 ./ q2z_hat
-            temp .= q2x_hat_inv' .* A
-            temp_A .= temp * A'
-            temp_inv = inv(diagm(q2z_hat_inv) + A * temp')
-            B .= (-1.0).*temp' * temp_inv * temp
-        
-            for i in 1:n
-                B[i,i] += q2x_hat_inv[i]
-            end
-            C .= temp_A - temp_A * temp_inv * temp_A 
+            q2z_hat_inv .= 1.0 ./ q2z_hat        
+            B .= (q2x_hat_inv' .* A) * A'  # m x m
+            C .= inv(LinearAlgebra.Diagonal(q2z_hat_inv) .+ B)  # m x m
+            D .= ((v2x_hat.*q2x_hat_inv.^2.0)'.*A) * A';  # m x m
+            F .= (v2z_hat' .* B) * B';  # m x m
 
-            AB .= A * B
-            AB_square .= AB.^2.0
+            ## d .= vec(sum(A' .* (C*A)' , dims=2))  # n
+            d .= dot.(eachrow(A'), eachcol(C*A))
+            h_tilde .= (h2x .+ A' * h2z) .* q2x_hat_inv  # n
+            BC .= B*C  # m x m
+            temp .= C * D * C;  # m x m
+            temp2 .= LinearAlgebra.Diagonal(v2z_hat) * BC;  # m * m
+            temp3 .= BC'* (v2z_hat .* BC);  # m x m
+            
+
             ## x
-            x2_hat .= B * (h2x + A' * h2z)
-            chi2x .= diag(B)
-            v2x .= (B.^2.0) * v2x_hat + AB_square' * v2z_hat
-            # v2x = (B.*B) * v2x_hat + AB_square' * v2z_hat
+            x2_hat .= h_tilde .- q2x_hat_inv .* (A' * (C*(A*h_tilde)));
+            chi2x .= q2x_hat_inv .- d .* q2x_hat_inv.^2.0;
+
+            v2x .= (
+                v2x_hat
+                .- 2.0 .* v2x_hat .* q2x_hat_inv .* d
+                ##.+ vec(sum(A' .* (temp * A)', dims=2))  # ここまで初項
+                .+ dot.(eachrow(A'), eachcol(temp * A))  # ここまで初項
+                # ここから第二項
+                # .+ vec(sum(A' .* (v2z_hat .* A)', dims=2))
+                # .- 2.0 .* vec(sum(A' .* (temp2 * A)', dims=2))
+                # .+ vec(sum(A'.*(temp3*A)', dims=2))
+                .+ dot.(eachrow(A'), eachcol(v2z_hat .* A))
+                .- 2.0 .* dot.(eachrow(A'), eachcol(temp2 * A))
+                .+ dot.(eachrow(A'), eachcol(temp3 * A))
+            ) .* q2x_hat_inv.^2.0
 
             ## z
             z2_hat .= A * x2_hat
-            chi2z .= diag(C)
-            v2z .= AB_square * v2x_hat + (C.^2.0) * v2z_hat
+            chi2z .= diag(B) .- diag(B*C*B)
+            v2z .= diag(
+                D .- 2.0 .* D*BC' .+ BC*D*BC'
+            ) .+ diag(
+                F .- 2.0 .* F * BC' .+ BC*F*BC'
+            )
+
 
             # message passing (Gaussian -> factorized)
             h1x .= dumping .* (x2_hat ./ chi2x .- h2x) .+ (1.0 .- dumping) .* h1x

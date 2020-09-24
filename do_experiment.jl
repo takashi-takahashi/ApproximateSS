@@ -6,7 +6,7 @@ using Distributions, LinearAlgebra
 using GLMNet
 
 
-m, n = 250, 1000;
+m, n = 250, 2000;
 ρ = 0.1;
 σ = 0.2;
 @time y, A, x_0, z_0, u, v, s = my_measurement_linear(m, n, ρ, σ, "row_orthogonal");  # synthetic
@@ -53,7 +53,7 @@ function do_SS(A, y, n_B, μ_B, λ; tol=1.0e-10, randomize=false)
     end
     return active_array, first_moment_array
 end
-n_B = 10000
+n_B = 1000
 μ_B = 1.0
 @time active_array, first_moment_array = do_SS(A, y, n_B, μ_B, λ./m, tol=1.0e-12, randomize=true);
 Π_experiment = vec(mean(active_array[:, :, cv_index], dims=1));
@@ -61,8 +61,8 @@ first_moment_experiment = vec(mean(first_moment_array[:, :, cv_index], dims=1));
 
 ### approximate SS ###
 # rvamp 
-@time ss_result = rvamp(A, y, λ_cv, Normal(), ApproximateSS.Diagonal(), dumping=0.75, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6);
-@time ss_result_sa = rvamp(A, y, λ_cv, Normal(), ApproximateSS.DiagonalRestricted(), dumping=0.75, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6);
+@time ss_result = rvamp(A, y, λ_cv, Normal(), ApproximateSS.Diagonal(), dumping=0.8, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6);
+@time ss_result_sa = rvamp(A, y, λ_cv, Normal(), ApproximateSS.DiagonalRestricted(), dumping=0.8, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6);
 
 x1_hat_ss = ss_result.x1_hat[1, :];
 Π = ss_result.Π[1,:];
