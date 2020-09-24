@@ -19,8 +19,18 @@ rvamp(
 ```
 という具合。
 
-## 例
+# その他の例
 * do_experiment_**.jlというファイルの実行例参照
+
+# dependence
+* Distributions.jl
+* FastGaussQuadrature.jl
+* GLMNet.jl
+    - 実験で使っている
+* QuadGK.jl
+    - （なんかある種の観測行列を作るときに使ってるっぽい）
+* SpecialFunctions.jl
+    - （なんかある種の観測行列を作るときに使ってるっぽい?）
 
 # メモ
 * 一回目の実行はコンパイルが走るので遅い
