@@ -31,6 +31,11 @@ rvamp(
 * Diagonal版の計算量のオーダーはO(n^3 p). nが非常に少なくて、pのほうがずっと大きい状況を想定した実装になっている。反復ごとにこれだけの計算量が必要
 * DiagonalRestricted版の計算量のオーダーはAの特異値分解と同じ。ただし、反復あたりはO(np)だと思う…。
 
+# TODO
+* ポアソン回帰あたり足す
+* ロジスティック回帰のDiagonal版のほう、ブートストラップ平均に相当するポアソン分布での平均が異常に遅い。というかポアソン分布に関する平均がいい加減すぎるのでなんとかしたい
+* etc....
+
 # see also
 * [Semi-analytic approximate stability selection for correlated data in generalized linear models](https://iopscience.iop.org/article/10.1088/1742-5468/ababff/meta)
     - この手法の導出を説明している論文。実データへの適用例もある。
