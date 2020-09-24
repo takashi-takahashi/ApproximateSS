@@ -28,6 +28,8 @@ rvamp(
 * 線形回帰とロジスティック回帰のみ実装済
 * intercept は Diagonal版だけ。（自己平均版には実装してない）
 * 観測数がパラメータ数より少ない場合にしか動きません (n < p)
+* Diagonal版の計算量のオーダーはO(n^3 p). nが非常に少なくて、pのほうがずっと大きい状況を想定した実装になっている。反復ごとにこれだけの計算量が必要
+* DiagonalRestricted版の計算量のオーダーはAの特異値分解と同じ。ただし、反復あたりはO(np)だと思う…。
 
 # see also
 * [Semi-analytic approximate stability selection for correlated data in generalized linear models](https://iopscience.iop.org/article/10.1088/1742-5468/ababff/meta)
