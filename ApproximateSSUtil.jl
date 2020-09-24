@@ -59,17 +59,6 @@ function my_newton_solver_b(q1z_hat::Float64, h1z::Float64, y::Float64, c::Int64
     return x_t
 end
 
-
-# function poisson_expect_sc(func, μ, max_c)::Float64
-# # function poisson_expect_sc(func, μ, max_c)
-#     # max_c = Int(round(μ*20.0))
-#     value = func(0) * pdf(Poisson(μ), 0)
-#     for c in 1:max_c
-#         value += func(c) * pdf(Poisson(μ), c)
-#     end
-#     return value
-# end
-
 function poisson_expect_sc(func, μ, max_c=100)::Float64
     value = func(0) * pdf(Poisson(μ), 0)
     for c in 1:max_c
