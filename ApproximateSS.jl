@@ -1116,7 +1116,7 @@ function rvamp(
             if debug
                 println("(z)")
             end
-            @time Threads.@threads for j in 1:m
+            Threads.@threads for j in 1:m
                 ### z1_hat
                 if info && j==1
                     println("z1_hat")
