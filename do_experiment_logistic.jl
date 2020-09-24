@@ -7,6 +7,11 @@ using GLMNet
 
 m, n = 250, 2000;
 ρ = 0.01;
+intercept = true;
+if intercept 
+    println("intercept estimation is not implemented for diagonal restricted covariance (self-averaging case)")
+    println("(intercept argument will be ignored)")
+end
 
 @time y, y_array, A, x_0, z_0, u, v, s =  my_measurement_logistic(m, n, ρ, "row_orthogonal");
 
@@ -22,10 +27,11 @@ cv_index = argmin(cv_result.meanloss)
 println("$cv_index, $(length(cv_result.lambda))")
 
 ### naive experiment ###
-function do_SS(A, y_array, n_B, μ_B, λ;  tol=1.0e-10, randomize=false)
+function do_SS(A, y_array, n_B, μ_B, λ;  tol=1.0e-10, randomize=false, intercept=false)
     λ₀ = λ
     active_array = zeros((n_B, n, length(λ)));
     first_moment_array = zeros((n_B, n, length(λ)));
+    intercept_first_moment_array = zeros((n_B, length(λ)));
 
     Threads.@threads for b in 1:n_B
         if randomize
@@ -40,33 +46,64 @@ function do_SS(A, y_array, n_B, μ_B, λ;  tol=1.0e-10, randomize=false)
         A_b = A[sample_index, :]
         glmnet_result = glmnet(
             A_b, y_b, Binomial(), lambda=λ, 
-            intercept=false, standardize=false,
+            intercept=intercept, standardize=false,
             tol=tol, maxit=100000, 
             penalty_factor=penalty_factor,
         )
-        active_array[b, :, :] = (glmnet_result.betas .!= 0.0)
-        first_moment_array[b,:, :] = glmnet_result.betas
+        if !intercept
+            active_array[b, :, :] = (glmnet_result.betas .!= 0.0)
+            first_moment_array[b,:, :] = glmnet_result.betas
+        else
+            active_array[b, :, :] = (glmnet_result.betas .!= 0.0)
+            first_moment_array[b,:, :] = glmnet_result.betas
+            intercept_first_moment_array[b,:] = glmnet_result.a0
+        end
         if b%10 == 0
             println(b)
         end
     end
-    return active_array, first_moment_array
+    return active_array, first_moment_array, intercept_first_moment_array
 end
 
-n_B = 100
+n_B = 10000
 μ_B = 1.0
-@time active_array, first_moment_array = do_SS(A, y_array, n_B, μ_B, λ./m, tol=1.0e-12, randomize=true);
+@time active_array, first_moment_array, intercept_first_moment_array = do_SS(
+        A, y_array, n_B, μ_B, λ./m, tol=1.0e-12, randomize=true, intercept=intercept
+    );
 Π_experiment = vec(mean(active_array[:, :, cv_index], dims=1));
 first_moment_experiment = vec(mean(first_moment_array[:, :, cv_index], dims=1));
+intercept_experiment = mean(intercept_first_moment_array[:, cv_index]);
+
 
 ### approximate SS ###
-@time ss_result = rvamp(A, y, λ_cv, Binomial(), ApproximateSS.Diagonal(), dumping=0.8, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6);
-@time ss_result_sa = rvamp(A, y, λ_cv, Binomial(), ApproximateSS.DiagonalRestricted(), dumping=0.8, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6);
+@time ss_result = rvamp(
+        A, y, λ_cv, Binomial(), ApproximateSS.Diagonal(),
+        dumping=0.8, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6, intercept=intercept
+    );
+@time ss_result_sa = rvamp(
+        A, y, λ_cv, Binomial(), ApproximateSS.DiagonalRestricted(),
+        dumping=0.8, t_max=50, debug=false, info=false, pw=0.5, tol=1.0e-6, intercept=intercept
+    );
+intercept_experiment = mean(intercept_first_moment_array[:, cv_index])
 
-x1_hat_ss = ss_result.x1_hat[1, :];
-Π = ss_result.Π[1,:];
-x1_hat_ss_sa = ss_result_sa.x1_hat[1, :];
-Π_sa = ss_result_sa.Π[1,:];
+
+x1_hat_ss = zeros(n);
+Π = zeros(n);
+x1_hat_ss_sa = zeros(n);
+Π_sa = zeros(n);
+if intercept
+    x1_hat_ss = ss_result.x1_hat[1, 2:n+1];
+    Π = ss_result.Π[1,2:n+1];
+    x1_hat_ss_sa = ss_result_sa.x1_hat[1, :];
+    Π_sa = ss_result_sa.Π[1,:];
+    println("intercept(experiment): $(intercept_experiment)")
+    println("intercept(rvamp (diagonal covariance)): $(ss_result.x1_hat[1])")
+else
+    x1_hat_ss = ss_result.x1_hat[1, :];
+    Π = ss_result_sa.Π[1,:];
+    x1_hat_ss_sa = ss_result_sa.x1_hat[1, :];
+    Π_sa = ss_result_sa.Π[1,:];        
+end
 
 ### visualize results ###
 using Plots

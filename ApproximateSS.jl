@@ -66,6 +66,9 @@ function rvamp(
 
     # preparation
     μ = bootstrap_ratio
+    if intercept
+        A = hcat(ones(size(A)[1]), A);
+    end
     m, n = size(A);  # system size
     c_max = Int(round(μ * 30))
     # c_array = convert(Array{Float64}, 0:c_max);
@@ -179,6 +182,11 @@ function rvamp(
                 x1_hat.^2.0,
                 clamp_min, clamp_max
             )
+            if intercept
+                x1_hat[1] = clamp(h1x[1]/(q1x_hat[1]), -1.0e5, 1.0e5)
+                chi1x[1] = clamp(1.0 / (q1x_hat[1]), 1.0e-9, 1.0e5)
+                v1x[1] = clamp(v1x_hat[1] / (q1x_hat[1]), 1.0e-9, 1.0e5)
+            end
 
             ## z
             if debug
@@ -231,6 +239,10 @@ function rvamp(
                 v1x ./ chi1x.^2.0 .- v1x_hat,
                 clamp_min, clamp_max
             )
+            if intercept
+                q2x_hat[1] = 1.0e-5
+                v2x_hat[1] = 1.0e-5
+            end
             h2z .= z1_hat ./ chi1z .- h1z
             q2z_hat .= clamp.(
                 1.0./chi1z .- q1z_hat,
@@ -377,6 +389,10 @@ function rvamp(
     )::RVAMPDiagonalRestricted
     println("approximate stability selection for linear regression")
     println("(diagonal restricted covariance)")
+    if intercept 
+        println("intercept estimation is not implemented for diagonal restricted covariance")
+        println("(intercept argument is ignored)")
+    end
 
     # preparation
     μ = bootstrap_ratio
@@ -666,13 +682,18 @@ function rvamp(
     )::RVAMPDiagonal
     println("approximate stability selection for logistic regression")
     println("(diagonal covariance)")
+    if intercept
+        println("intercept estimation is not implemented for diagonal restricted covariance")
+        println("(intercept argument is ignored)")
+    end
 
     # preparation
     μ = bootstrap_ratio
+    if intercept
+        A = hcat(ones(size(A)[1]), A);
+    end
     m, n = size(A);  # system size
     c_max = Int(round(μ * 30))
-    # c_array = convert(Array{Float64}, 0:c_max);
-    # poisson_weight = [pdf(Poisson(μ), c) for c in 0:c_max];
 
 
     q1x_hat_array = zeros((length(λ), n));
@@ -783,6 +804,11 @@ function rvamp(
                 x1_hat.^2.0,
                 clamp_min, clamp_max
             )
+            if intercept
+                x1_hat[1] = clamp(h1x[1]/(q1x_hat[1]), -1.0e5, 1.0e5)
+                chi1x[1] = clamp(1.0 / (q1x_hat[1]), 1.0e-9, 1.0e5)
+                v1x[1] = clamp(v1x_hat[1] / (q1x_hat[1]), 1.0e-9, 1.0e5)
+            end
 
             ## z
             if debug
@@ -848,6 +874,10 @@ function rvamp(
                 v1x ./ chi1x.^2.0 .- v1x_hat,
                 clamp_min, clamp_max
             )
+            if intercept
+                q2x_hat[1] = 1.0e-5
+                v2x_hat[1] = 1.0e-5
+            end
             h2z .= z1_hat ./ chi1z .- h1z
             q2z_hat .= clamp.(
                 1.0./chi1z .- q1z_hat,
@@ -994,7 +1024,10 @@ function rvamp(
     )::RVAMPDiagonalRestricted
     println("approximate stability selection for logistic regression")
     println("(diagonal restricted covariance)")
-
+    if intercept 
+        println("intercept estimation is not implemented for diagonal restricted covariance")
+        println("(intercept argument is ignored)")
+    end
     # preparation
     μ = bootstrap_ratio
     m, n = size(A);  # system size
