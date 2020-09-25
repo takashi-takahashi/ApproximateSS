@@ -2,9 +2,10 @@ include("./src/ApproximateSS.jl")
 include("./src/MyMeasurements.jl")
 using .MyMeasurements
 using .ApproximateSS
+# using ApproximateSS
 using Distributions, LinearAlgebra
 using GLMNet
-# using ApproximateSS  # if you installed ApproximateSS...
+
 
 
 m, n = 250, 2000;
