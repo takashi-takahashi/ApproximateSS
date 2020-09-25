@@ -25,20 +25,20 @@ rvamp(
 # 実行例
 ## synsthetic 
 以下は合成データを作ってそれに対して適用した例を示したもの。
-* do_experiment_linaer.jl
-    - 線形回帰で、特定の一つの値の正則化パラメータに対して実行した例。
+* linear_regreesion_synthetic.jl
+    - 線形回帰で、*特定の一つの*値の正則化パラメータに対して実行した例。
     - ナイーブなSSも実行して、精度を実験と比較している。
 
-* do_experiment_logistic.jl
-    - logistic回帰で、特定の一つの値の正則化パラメータに対して実行した例。
+* logistic_regression_synthetic.jl
+    - logistic回帰で、*特定の一つの*値の正則化パラメータに対して実行した例。
     - ナイーブなSSも実行して、精度を実験と比較している。
 
-* do_experiment_linaer_path.jl
-    - 線形回帰で、複数の値の正則化パラメータに対して実行した例。
+* linear_regression_path_synthetic.jl
+    - 線形回帰で、*複数の*値の正則化パラメータに対して実行した例。
     - ナイーブなSSも実行して、精度を実験と比較している。
 
-* do_experiment_logistic.jl
-    - logistic回帰で、複数の値の正則化パラメータに対して実行した例。
+* logistic_regression_path_synthetic.jl
+    - logistic回帰で、*複数の*値の正則化パラメータに対して実行した例。
     - ナイーブなSSも実行して、精度を実験と比較している。
 
 ## real world data
