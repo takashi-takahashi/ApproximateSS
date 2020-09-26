@@ -264,7 +264,8 @@ function rvamp(
             h2x .= x1_hat ./ chi1x .- h1x
             q2x_hat .= clamp.(
                 1.0./chi1x .- q1x_hat,
-                clamp_min, clamp_max
+                # clamp_min, clamp_max
+                1.0e-3, clamp_max
             )
             v2x_hat .= clamp.(
                 v1x ./ chi1x.^2.0 .- v1x_hat,
@@ -290,38 +291,10 @@ function rvamp(
             if debug
                 println("Gaussian part")
             end
-            # ---- naive imprementation ----
-            # X .= inv(diagm(q2x_hat) + A' * diagm(q2z_hat) * A)
-            # Y .= diagm(v2x_hat) + A'*diagm(v2z_hat)*A
-            # ## x
-            # if debug
-            #     println("(x)")
-            # end
-            # x2_hat .= X * (h2x .+ A'*h2z)
-            # chi2x .= clamp.(
-            #     diag(X),
-            #     clamp_min, clamp_max
-            # )
-            # v2x .= clamp.(
-            #     diag(X * Y * X),
-            #     clamp_min, clamp_max
-            # )
-            # ## z
-            # if debug
-            #     println("(y)")
-            # end
-            # z2_hat .= A * x2_hat
-            # chi2z .= clamp.(
-            #     diag(A*X*A'),
-            #     clamp_min, clamp_max
-            # )
-            # v2z .= clamp.(
-            #     diag(A*X*Y*X*A'),
-            #     clamp_min, clamp_max
-            # )
             q2x_hat_inv .= 1.0 ./ q2x_hat
             q2z_hat_inv .= 1.0 ./ q2z_hat        
             B .= (q2x_hat_inv' .* A) * A'  # m x m
+            # mul!(B, (q2x_hat_inv' .* A), A')
             C .= inv(LinearAlgebra.Diagonal(q2z_hat_inv) .+ B)  # m x m
             D .= ((v2x_hat.*q2x_hat_inv.^2.0)'.*A) * A';  # m x m
             F .= (v2z_hat' .* B) * B';  # m x m
@@ -361,7 +334,6 @@ function rvamp(
             ) .+ diag(
                 F .- 2.0 .* F * BC' .+ BC*F*BC'
             )
-
 
             # message passing (Gaussian -> factorized)
             h1x .= dumping .* (x2_hat ./ chi2x .- h2x) .+ (1.0 .- dumping) .* h1x
@@ -602,7 +574,8 @@ function rvamp(
             h2x .= x1_hat ./ chi1x .- h1x
             q2x_hat = clamp.(
                 1.0 / chi1x - q1x_hat,
-                clamp_min, clamp_max
+                # clamp_min, clamp_max
+                1.0e-3, clamp_max
             )
             v2x_hat = clamp.(
                 v1x / chi1x^2.0 - v1x_hat,
@@ -942,7 +915,8 @@ function rvamp(
             h2x .= x1_hat ./ chi1x .- h1x
             q2x_hat .= clamp.(
                 1.0./chi1x .- q1x_hat,
-                clamp_min, clamp_max
+                # clamp_min, clamp_max
+                1.0e-3, clamp_max
             )
             v2x_hat .= clamp.(
                 v1x ./ chi1x.^2.0 .- v1x_hat,
@@ -968,35 +942,7 @@ function rvamp(
             if debug
                 println("Gaussian part")
             end
-            # ---- naive imprementation ----
-            # X .= inv(diagm(q2x_hat) + A' * diagm(q2z_hat) * A)
-            # Y .= diagm(v2x_hat) + A'*diagm(v2z_hat)*A
-            # ## x
-            # if debug
-            #     println("(x)")
-            # end
-            # x2_hat .= X * (h2x .+ A'*h2z)
-            # chi2x .= clamp.(
-            #     diag(X),
-            #     clamp_min, clamp_max
-            # )
-            # v2x .= clamp.(
-            #     diag(X * Y * X),
-            #     clamp_min, clamp_max
-            # )
-            # ## z
-            # if debug
-            #     println("(y)")
-            # end
-            # z2_hat .= A * x2_hat
-            # chi2z .= clamp.(
-            #     diag(A*X*A'),
-            #     clamp_min, clamp_max
-            # )
-            # v2z .= clamp.(
-            #     diag(A*X*Y*X*A'),
-            #     clamp_min, clamp_max
-            # )
+            
             q2x_hat_inv .= 1.0 ./ q2x_hat
             q2z_hat_inv .= 1.0 ./ q2z_hat        
             B .= (q2x_hat_inv' .* A) * A'  # m x m
@@ -1299,7 +1245,8 @@ function rvamp(
             h2x .= x1_hat ./ chi1x .- h1x
             q2x_hat = clamp.(
                 1.0 / chi1x - q1x_hat,
-                clamp_min, clamp_max
+                # clamp_min, clamp_max
+                1.0e-3, clamp_max
             )
             v2x_hat = clamp.(
                 v1x / chi1x^2.0 - v1x_hat,
@@ -1319,37 +1266,6 @@ function rvamp(
             if debug
                 println("Gaussian part")
             end
-            # # ---- naive imprementation ----
-            # X .= inv(I(n).*q2x_hat .+ J .* q2z_hat)
-            # Y .= I(n) .* v2x_hat .+ J .* v2z_hat
-            # ## x
-            # if debug
-            #     println("(x)")
-            # end
-            # x2_hat .= X * (h2x .+ A'*h2z)
-            # chi2x = clamp.(
-            #     mean(diag(X)),
-            #     clamp_min, clamp_max
-            # )
-            # v2x = clamp.(
-            #     mean(diag(X * Y * X)),
-            #     clamp_min, clamp_max
-            # )
-            # ## z
-            # if debug
-            #     println("(z)")
-            # end
-            # z2_hat .= A * x2_hat
-            # chi2z = clamp.(
-            #     mean(diag(A*X*A')),
-            #     clamp_min, clamp_max
-            # )
-            # v2z = clamp.(
-            #     mean(diag(A*X*Y*X*A')),
-            #     clamp_min, clamp_max
-            # )
-
-
             # ----- efficient (?) implementation -----
             temp .= h2x .+ A' * h2z;
             x2_hat .= temp ./ q2x_hat .- v * ((s_m.^2.0 ./(q2z_hat.^(-1.0) .+ s_m.^2.0./q2x_hat)) .* (v' * temp)) ./ q2x_hat^2.0 
