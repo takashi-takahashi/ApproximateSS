@@ -101,10 +101,10 @@ if intercept
     println("intercept(rvamp (diagonal covariance)): $(ss_result.x1_hat[1])")
 else
     x1_hat_ss = ss_result.x1_hat[1, :];
-    Π = ss_result_sa.Π[1,:];
+    Π = ss_result.Π[1,:];
     x1_hat_ss_sa = ss_result_sa.x1_hat[1, :];
     Π_sa = ss_result_sa.Π[1,:];        
-end
+end;
 
 ### visualize results ###
 using Plots
