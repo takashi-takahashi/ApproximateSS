@@ -8,7 +8,7 @@ rvamp_result = rvamp(A, y, λ, family, covariance_type)
 ```
 `family`の部分は、線形回帰とロジスティック回帰に応じて`Normal()`か`Binomial()`で指定する。
 正則化パラメータの`λ`は配列で与える。例えば、パスの長さを`n_lambda`とすれば、`size(λ)`は`(n_λ, )`となる。
-`rvamp_result`は実行例に応じて`RVAMPDiagonal`か`RVAMPDiaognalRectrected`型のものが返ってくる。それぞれ、１次モーメントとか、stabilityを保持しており、`rvamp_result.x1_hat`とかで取り出すことが可能。
+`rvamp_result`は実行例に応じて`RVAMPDiagonal`か`RVAMPDiaognalRectrected`型のものが返ってくる。それぞれ、１次モーメントとか、stabilityを保持しており、`rvamp_result.x1_hat`とかで取り出すことが可能。よく使うstabilityは`rvamp_result.Π`である。その他理論家向けにOnsager係数とか局所場とか1,2次キュムラントも持っている。
 
 `covariance_type`はVAMPで使う共分散行列の構造を、`ApproximateSS.Diagonal()`か`ApproximateSS.DiagonalRestricted()`から指定する。前者の場合は、サイトごとに異なる二次モーメントの共役変数を指定する方法で、後者の場合はサイトごとに一定の二次モーメントの共役変数を指定する方法になっている(self-averaging rVAMP)。
 
