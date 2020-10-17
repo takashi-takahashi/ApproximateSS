@@ -101,9 +101,8 @@ function rvamp(
         A = hcat(ones(size(A)[1]), A);
     end
     m, n = size(A);  # system size
-    c_max = Int(round(μ * 30))
-    # c_array = convert(Array{Float64}, 0:c_max);
-    # poisson_weight = [pdf(Poisson(μ), c) for c in 0:c_max];
+    poisson_weight = [pdf(Poisson(μ), c) for c in 0:100 if pdf(Poisson(μ),c)>1.0e-10];
+    c_max = length(poisson_weight) - 1;
     
 
     q1x_hat_array = zeros((length(λ), n));
@@ -230,7 +229,7 @@ function rvamp(
                 end
                 z1_hat[j] = poisson_expect_sc(
                     c-> (h1z[j] + c*y[j]) / (c + q1z_hat[j]),
-                    μ, c_max
+                    poisson_weight
                 )
                 if info && j==1
                     println("chi1z")
@@ -238,7 +237,7 @@ function rvamp(
                 chi1z[j] = clamp(
                         poisson_expect_sc(
                         c->1.0/(c + q1z_hat[j]),
-                        μ, c_max
+                        poisson_weight
                     ),
                     clamp_min, clamp_max
                 )
@@ -251,7 +250,7 @@ function rvamp(
                                 ((h1z[j] + c*y[j])./(c + q1z_hat[j]))^2.0 
                                 + 
                                 v1z_hat[j] /　(c + q1z_hat[j])^2.0 
-                            ), μ, c_max
+                            ), poisson_weight
                     ) - z1_hat[j]^2.0,
                     clamp_min, clamp_max
                 )
@@ -421,9 +420,8 @@ function rvamp(
     # preparation
     μ = bootstrap_ratio
     m, n = size(A);  # system size
-    c_max = Int(round(μ * 30))
-    # c_array = convert(Array{Float64}, 0:c_max);
-    # poisson_weight = [pdf(Poisson(μ), c) for c in 0:c_max];
+    poisson_weight = [pdf(Poisson(μ), c) for c in 0:100 if pdf(Poisson(μ),c)>1.0e-10];
+    c_max = length(poisson_weight) - 1;
     
 
     q1x_hat_array = zeros((length(λ)));
@@ -544,14 +542,14 @@ function rvamp(
                 end
                 z1_hat[j] = poisson_expect_sc(
                     c-> (h1z[j] + c*y[j]) / (c + q1z_hat),
-                    μ, c_max
+                    poisson_weight
                 )
                 if info && j==1
                     println("chi1z")
                 end
                 chi1z_temp[j] = poisson_expect_sc(
                     c->1.0/(c + q1z_hat),
-                    μ, c_max
+                    poisson_weight
                 )
                 if info && j==1
                     println("v1z")
@@ -561,7 +559,7 @@ function rvamp(
                             ((h1z[j] + c*y[j])./(c + q1z_hat))^2.0 
                             + 
                             v1z_hat /　(c + q1z_hat)^2.0 
-                        ), μ, c_max
+                        ), poisson_weight
                 ) - z1_hat[j]^2.0
             end
             chi1z = mean(chi1z_temp)
@@ -740,8 +738,9 @@ function rvamp(
         A = hcat(ones(size(A)[1]), A);
     end
     m, n = size(A);  # system size
-    c_max = Int(round(μ * 30))
 
+    poisson_weight = [pdf(Poisson(μ), c) for c in 0:100 if pdf(Poisson(μ),c)>1.0e-10];
+    c_max = length(poisson_weight) - 1;
 
     q1x_hat_array = zeros((length(λ), n));
     v1x_hat_array = zeros((length(λ), n));
@@ -871,7 +870,7 @@ function rvamp(
                     c->sum(
                         my_newton_solver_b.(q1z_hat[j], h1z[j] .+ (2v1z_hat[j])^0.5 .* ηz, y[j], c) 
                         .* w_ηz ./ π^0.5
-                    ),μ
+                    ), poisson_weight
                 )
                 ### chi1z
                 if info && j==1
@@ -887,7 +886,7 @@ function rvamp(
                                         ).^2.0 
                                 )
                                 .* w_ηz / π^0.5
-                            ), μ
+                            ), poisson_weight
                         ),
                         clamp_min, clamp_max
                     )
@@ -901,7 +900,7 @@ function rvamp(
                             c->sum(
                                 my_newton_solver_b.(q1z_hat[j], h1z[j] .+ (2v1z_hat[j])^0.5 .* ηz, y[j], c).^2.0
                                 .* w_ηz ./ π^0.5
-                            ), μ
+                            ), poisson_weight
                         ) - z1_hat[j]^2.0,
                         clamp_min, clamp_max
                 )
@@ -1073,9 +1072,10 @@ function rvamp(
     # preparation
     μ = bootstrap_ratio
     m, n = size(A);  # system size
-    c_max = Int(round(μ * 30))
-    # c_array = convert(Array{Float64}, 0:c_max);
-    # poisson_weight = [pdf(Poisson(μ), c) for c in 0:c_max];
+
+    # c_max = Int(round(μ * 30))
+    poisson_weight = [pdf(Poisson(μ), c) for c in 0:100 if pdf(Poisson(μ),c)>1.0e-10];
+    c_max = length(poisson_weight) - 1;
 
 
     q1x_hat_array = zeros((length(λ)));
@@ -1100,7 +1100,9 @@ function rvamp(
 
     h1z = rand(Normal(0.0, 1.0), m);
     q1z_hat = 1.0;
+    q1z_hat_ = ones(m);
     v1z_hat = 1.0;
+    v1z_hat_ = ones(m);
     h2z = zeros(m);
     q2z_hat = 1.0;
     v2z_hat = 1.0;
@@ -1191,49 +1193,53 @@ function rvamp(
             if debug
                 println("(z)")
             end
-            Threads.@threads for j in 1:m
+
+            v1z_hat_ .= ones(m) .* v1z_hat
+            q1z_hat_ .= ones(m) .* q1z_hat
+            
+            @time Threads.@threads for j in 1:m
                 ### z1_hat
                 if info && j==1
                     println("z1_hat")
                 end
                 z1_hat[j] = poisson_expect_sc(
                     c->sum(
-                        my_newton_solver_b.(q1z_hat, h1z[j] .+ (2.0*v1z_hat)^0.5 .* ηz, y[j], c) 
+                        # my_newton_solver_b.(q1z_hat, h1z[j] .+ (2v1z_hat)^0.5 .* ηz, y[j], c) 
+                        my_newton_solver_b.(q1z_hat_[j], h1z[j] .+ (2v1z_hat_[j])^0.5 .* ηz, y[j], c) 
                         .* w_ηz ./ π^0.5
-                    ), μ
+                    ), poisson_weight
                 )
+
                 ### chi1z
                 if info && j==1
                     println("chi1z")
                 end
-                chi1z_temp[j] = clamp(
-                        poisson_expect_sc(
+                chi1z_temp[j] = poisson_expect_sc(
                             c->sum(
                                 1.0./(
                                     q1z_hat
                                     .+ c .* 0.25 ./ cosh.(
-                                            0.5 .* my_newton_solver_b.(q1z_hat, h1z[j] .+ (2.0*v1z_hat)^0.5 .* ηz, y[j], c)
+                                            # 0.5 .* my_newton_solver_b.(q1z_hat, h1z[j] .+ (2v1z_hat)^0.5 .* ηz, y[j], c)
+                                            0.5 .* my_newton_solver_b.(q1z_hat_[j], h1z[j] .+ (2v1z_hat_[j])^0.5 .* ηz, y[j], c) 
                                         ).^2.0 
                                 )
                                 .* w_ηz / π^0.5
-                            ), μ
-                        ),
-                        clamp_min, clamp_max
-                    )
+                            ), poisson_weight
+                        )
 
                 ### v1z
                 if info && j==1
                     println("v1z")
                 end
-                v1z_temp[j] = clamp(
+                v1z_temp[j] = 
                         poisson_expect_sc(
                             c->sum(
-                                my_newton_solver_b.(q1z_hat, h1z[j] .+ (2.0*v1z_hat)^0.5 .* ηz, y[j], c).^2.0
+                                # my_newton_solver_b.(q1z_hat, h1z[j] .+ (2v1z_hat)^0.5 .* ηz, y[j], c).^2.0
+                                my_newton_solver_b.(q1z_hat_[j], h1z[j] .+ (2v1z_hat_[j])^0.5 .* ηz, y[j], c).^2.0
                                 .* w_ηz ./ π^0.5
-                            ), μ
-                        ) - z1_hat[j]^2.0,
-                        clamp_min, clamp_max
-                )
+                            ), poisson_weight
+                        ) - z1_hat[j]^2.0
+
             end
             chi1z = mean(chi1z_temp)
             v1z = mean(v1z_temp)

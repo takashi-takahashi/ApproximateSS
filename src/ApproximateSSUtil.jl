@@ -47,7 +47,7 @@ end
 ブートストラップしている場合の、logistic回帰用ニュートン法solver
 """
 function my_newton_solver_b(q1z_hat::Float64, h1z::Float64, y::Float64, c::Int64,
-    x0=0.0::Float64, tol=1e-9::Float64, max_iter=100::Int64)::Float64
+    x0=0.0::Float64, tol=1e-8::Float64, max_iter=100::Int64)::Float64
     x_t = x0
     for t in 1:max_iter
         pre_x = x_t
@@ -59,10 +59,10 @@ function my_newton_solver_b(q1z_hat::Float64, h1z::Float64, y::Float64, c::Int64
     return x_t
 end
 
-function poisson_expect_sc(func, μ, max_c=100)::Float64
-    value = func(0) * pdf(Poisson(μ), 0)
-    for c in 1:max_c
-        value += func(c) * pdf(Poisson(μ), c)
+function poisson_expect_sc(func, poisson_weight)::Float64
+    value = func(0) * poisson_weight[1]
+    for c in 1:(length(poisson_weight)-1)
+        value += func(c) * poisson_weight[c+1]
     end
     value
 end
